@@ -66,7 +66,8 @@ jobs:
         export TARGET_ARCH="arm"
         export FOX_BUILD_TYPE="Beta"
         export ARCH=arm
-        export CROSS_COMPILE=/opt/toolchains/arm-eabi-4.7/bin/arm-eabi-
+        export PATH="/opt/toolchains/arm-eabi-4.7/bin:$PATH"
+        export CROSS_COMPILE=arm-eabi-
         sed -i 's/^YYLTYPE yylloc;/extern YYLTYPE yylloc;/' ~/TWRP/kernel/samsung/rossa-caf/scripts/dtc/dtc-lexer.lex.c_shipped
         export LC_ALL=C
         mkdir -p /home/runner/TWRP/out/host/linux-x86/bin/ 
