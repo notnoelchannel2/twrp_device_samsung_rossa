@@ -1,2 +1,2 @@
-add_lunch_combo omni_gprimeltexx-eng
-add_lunch_combo omni_gprimeltexx-userdebug
+add_lunch_combo omni_rossa-eng
+add_lunch_combo omni_rossa-userdebug

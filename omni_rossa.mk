@@ -1,5 +1,5 @@
 # Release name
-PRODUCT_RELEASE_NAME := gprimeltexx
+PRODUCT_RELEASE_NAME := rossa
 
 $(call inherit-product, build/target/product/embedded.mk)
 
@@ -7,7 +7,7 @@ $(call inherit-product, build/target/product/embedded.mk)
 $(call inherit-product, vendor/omni/config/common.mk)
 
 ## Device identifier. This must come after all inclusions
-PRODUCT_DEVICE := gprimeltexx
-PRODUCT_NAME := omni_gprimeltexx
+PRODUCT_DEVICE := rossa
+PRODUCT_NAME := omni_rossa
 PRODUCT_BRAND := samsung
 PRODUCT_MANUFACTURER := samsung

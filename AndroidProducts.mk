@@ -1,1 +1,1 @@
-PRODUCT_MAKEFILES := $(LOCAL_DIR)/omni_gprimeltexx.mk
+PRODUCT_MAKEFILES := $(LOCAL_DIR)/omni_rossa.mk
