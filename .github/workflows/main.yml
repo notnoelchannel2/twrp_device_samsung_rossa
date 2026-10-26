@@ -57,6 +57,8 @@ jobs:
         export CROSS_COMPILE=/opt/toolchains/arm-eabi-4.7/bin/arm-eabi-
         sed -i 's/^YYLTYPE yylloc;/extern YYLTYPE yylloc;/' ~/TWRP/kernel/samsung/rossa-caf/scripts/dtc/dtc-lexer.lex.c_shipped
         export LC_ALL=C
+        mkdir -p /home/runner/TWRP/out/host/linux-x86/bin/ 
+        curl -L -o /home/runner/TWRP/out/host/linux-x86/bin/dtbToolCM https://github.com/Vagelis1608/-V-_Kernel_X/raw/refs/heads/cm-14.1/dtbToolCM
         lunch omni_rossa-eng
         make -j$(nproc --all) recoveryimage
         export PATH=$OLDPATH
