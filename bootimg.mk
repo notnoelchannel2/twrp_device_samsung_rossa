@@ -5,7 +5,7 @@
 LOCAL_PATH := $(call my-dir)
 
 ## Build and run dtbtool (from Snippet 1)
-DTBTOOL := $(HOST_OUT_EXECUTABLES)/dtbToolCM$(HOST_EXECUTABLE_PREFIX)
+DTBTOOL := $(HOST_OUT_EXECUTABLES)/dtbToolCM
 INSTALLED_DTIMAGE_TARGET := $(PRODUCT_OUT)/dt.img
 
 ifneq ($(TARGET_KERNEL_ARCH),)
