@@ -1,0 +1,84 @@
+name: OrangeFox CI
+
+on:
+    workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    steps:
+    - uses: actions/checkout@v5
+    - name: Installing JDK 7 + Build Dependencies
+      run: |
+        sudo dpkg --add-architecture i386
+        sudo apt-get update
+        sudo apt-get install -y software-properties-common
+        sudo add-apt-repository ppa:deadsnakes/ppa
+        sudo add-apt-repository universe
+        sudo apt-get update
+        sudo apt-get install -y bc bison build-essential ccache curl flex axel g++-multilib gcc-multilib git git-lfs gnupg gperf imagemagick protobuf-compiler python3-protobuf lib32readline-dev lib32z1-dev libdw-dev libelf-dev lz4 libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev
+        wget https://archive.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2_amd64.deb && sudo dpkg -i libtinfo5_6.3-2_amd64.deb && rm -f libtinfo5_6.3-2_amd64.deb
+        wget https://archive.ubuntu.com/ubuntu/pool/universe/n/ncurses/libncurses5_6.3-2_amd64.deb && sudo dpkg -i libncurses5_6.3-2_amd64.deb && rm -f libncurses5_6.3-2_amd64.deb
+        cd /usr/local/src
+        sudo wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz
+        sudo tar xvf Python-2.7.18.tgz
+        cd Python-2.7.18
+        sudo ./configure --enable-optimizations
+        sudo make altinstall
+        sudo ln -sf /usr/local/bin/python2.7 /usr/bin/python2
+        sudo ln -sf /usr/local/bin/python2.7 /usr/bin/python
+    - name: Install OpenJDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: '8'
+    - name: Syncing TWRP sources
+      run: |
+        mkdir ~/TWRP
+        cd ~/TWRP
+        mkdir ~/.bin
+        curl http://commondatastorage.googleapis.com/git-repo-downloads/repo > ~/.bin/repo
+        python3 ~/.bin/repo init --depth=1 -u https://github.com/unlegacy-devices/fox-7.1_manifest -b twrp-7.1
+        sudo git clone --depth 1 --branch android-4.4.4_r2.0.1 --single-branch https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7 /opt/toolchains/arm-eabi-4.7/
+        git clone --branch twrp-6.0 --single-branch https://github.com/notnoelchannel2/twrp_device_samsung_rossa.git ~/TWRP/device/samsung/rossa
+        python3 ~/.bin/repo sync -c --force-sync --optimized-fetch --no-tags --no-clone-bundle --prune -j$(nproc --all)
+    - name: Building TWRP
+      run: |
+        OLDPATH=$PATH
+        OLDJAVAHOME=$JAVA_HOME
+        export PATH="$HOME/.jdk_7/java-se-7u75-ri/bin:$PATH"
+        export JAVA_HOME="$HOME/.jdk_7/java-se-7u75-ri"
+        cd ~/TWRP
+        git clone https://github.com/notnoelchannel2/android_kernel_samsung_rossa-caf -b cm-13.0 ~/TWRP/kernel/samsung/rossa-caf
+        source build/envsetup.sh
+        export FOX_USE_TWRP_RECOVERY_IMAGE_BUILDER=1
+        export OF_DISABLE_MIUI_SPECIFIC_FEATURES=1
+        export ALLOW_MISSING_DEPENDENCIES=true
+        export LC_ALL=C
+        export OF_USE_GREEN_LED=0
+        export FOX_RECOVERY_SYSTEM_PARTITION="/dev/block/mmcblk0p24"
+        export FOX_RECOVERY_BOOT_PARTITION="/dev/block/mmcblk0p16"
+        export FOX_RECOVERY_INSTALL_PARTITION="/dev/block/mmcblk0p17"
+        export OF_LEGACY_SHAR512=1
+        export OF_DISABLE_KEYMASTER2=1
+        export OF_MAINTAINER="notnoelchannel"
+        export TARGET_ARCH="arm"
+        export FOX_BUILD_TYPE="Beta"
+        export ARCH=arm
+        export CROSS_COMPILE=/opt/toolchains/arm-eabi-4.7/bin/arm-eabi-
+        sed -i 's/^YYLTYPE yylloc;/extern YYLTYPE yylloc;/' ~/TWRP/kernel/samsung/rossa-caf/scripts/dtc/dtc-lexer.lex.c_shipped
+        export LC_ALL=C
+        mkdir -p /home/runner/TWRP/out/host/linux-x86/bin/ 
+        curl -L -o /home/runner/TWRP/out/host/linux-x86/bin/dtbToolCM https://github.com/Vagelis1608/-V-_Kernel_X/raw/refs/heads/cm-14.1/dtbToolCM
+        chmod +x /home/runner/TWRP/out/host/linux-x86/bin/dtbToolCM
+        find bootable/recovery -type f \( -name "*.cpp" -o -name "*.c" -o -name "*.h" \) -exec sed -i 's/heap_mask/heap_id_mask/g' {} +
+        lunch omni_rossa-eng
+        make -j$(nproc --all) recoveryimage
+        export PATH=$OLDPATH
+        export JAVA_HOME=$OLDJAVAHOME
+    - name: Uploading TWRP builds
+      uses: actions/upload-artifact@v6
+      with:
+        name: twrp
+        path: /home/runner/TWRP/out/target/product/rossa/recovery.*
