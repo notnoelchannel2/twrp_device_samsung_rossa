@@ -21,7 +21,7 @@ $(INSTALLED_DTIMAGE_TARGET): $(DTBTOOL) $(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/u
 	@echo -e ${CL_CYN}"Made DT image: $@"${CL_RST}
 
 ## TWRP Recovery Variables (from Snippet 2)
-MKBOOTIMG := device/samsung/rossa/mkbootimg
+MKBOOTIMG := $(HOST_OUT_EXECUTABLES)/mkbootimg
 TWRP_VERSION := $(shell cat bootable/recovery/variables.h | grep "define TW_MAIN_VERSION_STR" | cut -d\" -f2)
 TWRP_NAME := recovery-TWRP-$(TWRP_VERSION)-rossa-$(shell date +%Y-%m-%d-%H.%M.%S)
 
